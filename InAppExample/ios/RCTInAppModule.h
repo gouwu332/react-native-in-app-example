@@ -9,9 +9,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RCTInAppModule: NSObject <RCTBridgeModule>
+@interface RCT_EXTERN_MODULE(InAppModule, NSObject)
 
-- (void)launch;
+RCT_EXTERN_METHOD(launch)
 
 @end
 
