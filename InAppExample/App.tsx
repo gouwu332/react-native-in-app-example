@@ -1,12 +1,21 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { NativeModules } from 'react-native';
+import { Button, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+
+const {InAppModule} = NativeModules;
+
+const onPress = () => {
+  InAppModule.launch();
+};
 
 const App = () => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Launch Chat</Text>
-      </TouchableOpacity>
+      <Button
+        title="Launch Chat"
+        color="#841584"
+        onPress={onPress}
+      />
     </View>
   );
 };
