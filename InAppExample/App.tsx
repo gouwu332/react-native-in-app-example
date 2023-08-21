@@ -1,14 +1,22 @@
 import React from 'react';
 import { NativeModules } from 'react-native';
 import { Button, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 const {InAppModule} = NativeModules;
+const Stack = createNativeStackNavigator();
 
 const onPress = () => {
-  InAppModule.launch();
+  InAppModule.launch(
+    'https://your-domain.my.salesforce-scrt.com',
+    'Your-Org-Id',
+    'Your-Developer-Name',
+    'Some-UUIDv4-String'
+  );
 };
 
-const App = () => {
+const HomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Button
@@ -18,7 +26,22 @@ const App = () => {
       />
     </View>
   );
+}
+
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+				<Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{title: 'Welcome'}}
+        	/>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
+
 
 const styles = StyleSheet.create({
   container: {
