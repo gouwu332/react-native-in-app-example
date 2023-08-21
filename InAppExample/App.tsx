@@ -1,28 +1,62 @@
 import React from 'react';
 import { NativeModules } from 'react-native';
 import { Button, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import uuid from 'react-native-uuid';
 
-const {InAppModule} = NativeModules;
+const { InAppModule } = NativeModules;
 const Stack = createNativeStackNavigator();
+var conversationId = null;
 
-const onPress = () => {
-  InAppModule.launch(
+const onConfigure = () => {
+  conversationId = uuid.v4();
+  InAppModule.configure(
     'https://your-domain.my.salesforce-scrt.com',
-    'Your-Org-Id',
-    'Your-Developer-Name',
-    'Some-UUIDv4-String'
+    'your-org-id',
+    'your-developer-name',
+    conversationId
   );
 };
+
+const onLaunch = () => {
+  InAppModule.launch();
+};
+
+const onConversations = () => {
+  InAppModule.retrieveConversations(
+    result => {
+      console.log(`Conversation Result: ${result}`)
+    }
+  );
+};
+
+const onDestroyDB = () => {
+  InAppModule.destroyDB();
+}
 
 const HomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Button
+        title="Configure"
+        color="#841584"
+        onPress={onConfigure}
+      />
+      <Button
         title="Launch Chat"
         color="#841584"
-        onPress={onPress}
+        onPress={onLaunch}
+      />
+      <Button
+        title="Log Conversation Info"
+        color="#841584"
+        onPress={onConversations}
+      />
+      <Button
+        title="Wipe offline Data"
+        color="#841584"
+        onPress={onDestroyDB}
       />
     </View>
   );
