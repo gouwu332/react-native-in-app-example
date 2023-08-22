@@ -57,12 +57,13 @@ class InAppModule: NSObject {
       return
     }
 
+    let topQueryGroup = DispatchGroup()
     var results: [[String:String]] = []
 
     // Execute a query on the core configuration to retrieve active conversations the local user is a part of.
     // This is a paginated API, you can retrieve additional pages by passing in a reference to the oldest conversation in the previous
     // page to `olderThanConversation`
-    core.conversations(withLimit: 1, olderThanConversation: nil, completion: { conversations, error in
+    core.conversations(withLimit: 0, olderThanConversation: nil, completion: { conversations, error in
       if (error != nil) {
         completion([])
         return
@@ -75,41 +76,46 @@ class InAppModule: NSObject {
       //  }]
       //
       // As configured this will just return the last entry on the last conversation.
-      // TODO: Update with full comprehensive query
       conversations?.forEach({ conversation in
-        let client = core.conversationClient(with: conversation.identifier)
+        topQueryGroup.enter()
 
-        client.entries(withLimit: 1, olderThanEntry: nil) { entries, _, entryError in
+        let client = core.conversationClient(with: conversation.identifier)
+        var payload: [String:String] = [:]
+        var lastMessageText: String = ""
+
+        payload["conversationId"] = conversation.identifier.uuidString
+
+        client.entries(withLimit: 0, olderThanEntry: nil) { entries, _, entryError in
           if (error != nil) {
-            completion([])
+            topQueryGroup.leave()
             return
           }
 
-          var payload: [String:String] = [:]
-          var lastMessageText: String = ""
-
-          if let entry = entries?.first {
+          // As an example we'll just extract the latest entry which is a textMessage
+          if let entry = entries?.first(where: { $0.format == .textMessage }) {
             lastMessageText = self.previewText(entry)
           }
 
-          payload["conversationId"] = conversation.identifier.uuidString
           payload["lastMessageText"] = lastMessageText
           results.append(payload)
-
-          guard let data = try? JSONSerialization.data(withJSONObject: results, options: []) else {
-            completion([])
-            return
-          }
-
-          guard let result = String(data: data, encoding: .utf8) else {
-            completion([])
-            return
-          }
-
-          completion([result])
-          return;
+          topQueryGroup.leave()
         }
       })
+
+      topQueryGroup.notify(queue: .main) {
+        guard let data = try? JSONSerialization.data(withJSONObject: results, options: [.prettyPrinted, .sortedKeys]) else {
+          completion([])
+          return
+        }
+
+        guard let result = String(data: data, encoding: .utf8) else {
+          completion([])
+          return
+        }
+
+        completion([result])
+        return
+      }
     })
   }
 }
