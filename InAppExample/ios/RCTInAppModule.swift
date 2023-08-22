@@ -51,9 +51,13 @@ class InAppModule: NSObject {
     core.destroyStorage { _ in }
   }
 
-  @objc func retrieveConversations(_ completion: @escaping RCTResponseSenderBlock) {
+  func sendEvent(data: NSArray) {
+    EventEmitter.emitter.sendEvent(withName: "getConversations", body: data)
+  }
+
+  @objc func retrieveConversations() {
     guard let core = self.core else {
-      completion([])
+      self.sendEvent(data:[])
       return
     }
 
@@ -65,7 +69,7 @@ class InAppModule: NSObject {
     // page to `olderThanConversation`
     core.conversations(withLimit: 0, olderThanConversation: nil, completion: { conversations, error in
       if (error != nil) {
-        completion([])
+        self.sendEvent(data: [])
         return
       }
 
@@ -104,16 +108,16 @@ class InAppModule: NSObject {
 
       topQueryGroup.notify(queue: .main) {
         guard let data = try? JSONSerialization.data(withJSONObject: results, options: [.prettyPrinted, .sortedKeys]) else {
-          completion([])
+          self.sendEvent(data:[])
           return
         }
 
         guard let result = String(data: data, encoding: .utf8) else {
-          completion([])
+          self.sendEvent(data:[])
           return
         }
 
-        completion([result])
+        self.sendEvent(data:[result])
         return
       }
     })

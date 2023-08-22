@@ -19,7 +19,7 @@ RCT_EXTERN_METHOD(configure:(NSString *)url
 RCT_EXTERN_METHOD(launch)
 RCT_EXTERN_METHOD(destroyDB)
 
-RCT_EXTERN_METHOD(retrieveConversations:(RCTResponseSenderBlock)completion)
+RCT_EXTERN_METHOD(retrieveConversations)
 
 @end
 
