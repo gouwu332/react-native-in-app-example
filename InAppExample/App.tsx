@@ -39,7 +39,7 @@ const HomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Button
-        title="Configure"
+        title="Click here to Initialize or to create new conversations"
         color="#841584"
         onPress={onConfigure}
       />
